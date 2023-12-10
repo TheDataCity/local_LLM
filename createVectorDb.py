@@ -14,7 +14,6 @@ from constants import (
     CHROMA_SETTINGS,
     DOCUMENT_MAP,
     EMBEDDING_MODEL_NAME,
-    INGEST_THREADS,
     PERSIST_DIRECTORY,
     SOURCE_DIRECTORY,
 )
@@ -25,10 +24,11 @@ def create_embedding(device_type):
         model_name=EMBEDDING_MODEL_NAME,
         model_kwargs={"device": device_type},
         )
+    
     # change the embedding type here if you are running into issues.
     # These code uses much smaller embeddings and will work for most appications
     # If you use HuggingFaceEmbeddings, make sure to also use the same in the
-    # run_localGPT.py file.
+    # run_localLLM.py file.
 
     # embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
 
@@ -84,7 +84,7 @@ def create_db_from_text_files(filePaths,embedding):
     for companyNumber in companyNumberList:
         counter +=1
         if (not os.path.exists(os.path.join(PERSIST_DIRECTORY, companyNumber))):
-            print(f"{counter}. {companyNumber} vector database doese not exisits")
+            print(f"{companyNumber} vector database doese not exisits")
             # Load entire Folder
             # text_loader_kwargs={'autodetect_encoding': True}
             # loader = DirectoryLoader("../database-sample/", glob="./*.txt",  show_progress=True, loader_cls=TextLoader, loader_kwargs=text_loader_kwargs)

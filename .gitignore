@@ -1,6 +1,7 @@
 # Ignore vscode
 /.vscode
 /data
+/local_chat_history
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

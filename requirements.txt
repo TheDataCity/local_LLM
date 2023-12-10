@@ -34,3 +34,6 @@ openpyxl
 
 # Llama
 llama-cpp-python
+
+#pip uninstall torch
+#pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
