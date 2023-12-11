@@ -17,7 +17,7 @@ This is a chatbot application that provides information about companies based on
 
 The code can run on command line as well as GUI (streamlit applicatiobn)
 
-## Getting Started
+# Getting Started
 - Clone the repository to your local machine.
 ```shell
 git clone https://github.com/TheDataCity/local_LLM.git
@@ -35,7 +35,7 @@ pip install -r requirements.txt
 pip install llama-cpp-python
 ```
 
-## Creating the Vector Database
+# Creating the Vector Database
 The database folder will contain text files extracted from various companies' websites. These text files will be used by the chatbot to provide information about specific company.
 
 **Location**: The database folder is expected to be located in the root directory of this project. Sample of two companies is provided in the repository and move it accordingly to the database folder. The project folder structure should look like this:<br/>
@@ -91,7 +91,7 @@ Here's a brief explanation for each device type:
 
 Once the code is executed sucessfully you will find the "vector_database" folder created within the "data" folder.
 
-## Executing the code for Command line interface.
+# Executing the code for Command line interface
 In order to chat using command line, run the following command (by default, it will run on `cuda`).
 ```shell
 python run_localLLM.py
@@ -101,19 +101,67 @@ You can also specify the device type just like `createVectorDb.py`
 python run_localLLM.py --device_type mps # to run on Apple silicon
 ```
 
-### Extra Options with run_localLLM.py
+## Extra Options with run_localLLM.py
 
-You can use the `--show_sources` flag with `run_localLLM.py` to show which chunks were retrieved by the embedding model.
+You can use the `--show_sources` flag with `run_localLLM.py` to show which chunks were retrieved by the embedding model. Default is not to show the sources
 ```shell
 python run_localLLM.py --show_sources
 ```
 
-Another option is to enable chat history.
+Another option is to enable chat history. Default is not to save history
 ```shell
 python run_localLLM.py --use_history
 ```
 
-Another option is to save the chat in a csv file.
+Another option is to save the chat in a csv file. Default is not to save
 ```shell
 python run_localLLM.py --save_qa
 ```
+
+Another option is to sselect the model type ["llama", "mistral", "non_llama"]. Default is "llama"
+```shell
+python run_localLLM.py --model_type 
+```
+
+Once the code is excecuted, you will be prompted to enter the company number you want to know about, type the company number, you can only type the company number that is available in the `data/vector_database` folder
+
+# Executing the code for GUI (Streamlit)
+In order to chat using the GUI, run the following command.
+```shell
+streamlit run run_localLLM.py
+```
+From the side menu, select the company you want to know about
+Tick the options on the menu to select the device type, sources, history, save chat
+
+## Steps to Switch Between Different LLM Models
+
+To alternate between various LLM models, you need to adjust both the `MODEL_ID` and `MODEL_BASENAME` settings.
+
+1. Locate and open `constants.py` in your preferred text editor.
+2. Modify the values of `MODEL_ID` and `MODEL_BASENAME`. Note that for quantized models like `GGML`, `GPTQ`, `GGUF`, it's necessary to specify `MODEL_BASENAME`. For non-quantized models, set `MODEL_BASENAME` to `NONE`.
+3. Several example models from HuggingFace are compatible and have been verified to work with this setup. These include original trained models (identified by the suffix HF or a .bin file in "Files and versions") and quantized models (identified by GPTQ suffix or having .no-act-order or .safetensors in "Files and versions").
+4. For models with an HF suffix or a .bin file on their HuggingFace page:
+   - Choose a `MODEL_ID`. For instance, `MODEL_ID = "TheBloke/guanaco-7B-HF"`.
+   - Visit the corresponding [HuggingFace Repository](https://huggingface.co/TheBloke/guanaco-7B-HF).
+5. For models labeled with GPTQ or having .no-act-order or .safetensors in their HuggingFace "Files and versions":
+   - Select a `MODEL_ID`, like `model_id = "TheBloke/wizardLM-7B-GPTQ"`.
+   - Navigate to the appropriate [HuggingFace Repository](https://huggingface.co/TheBloke/wizardLM-7B-GPTQ) and view "Files and versions".
+   - Choose a model name and set it as `MODEL_BASENAME`, e.g., `MODEL_BASENAME = "wizardLM-7B-GPTQ-4bit.compat.no-act-order.safetensors"`.
+6. Repeat similar steps for selecting `GGUF` and `GGML` models.
+
+## GPU and VRAM Requirements
+
+Below is the VRAM requirement for different models depending on their size (Billions of parameters). The estimates in the table does not include VRAM used by the Embedding models - which use an additional 2GB-7GB of VRAM depending on the model.
+
+| Mode Size (B) | float32   | float16   | GPTQ 8bit      | GPTQ 4bit          |
+| ------- | --------- | --------- | -------------- | ------------------ |
+| 7B      | 28 GB     | 14 GB     | 7 GB - 9 GB    | 3.5 GB - 5 GB      |
+| 13B     | 52 GB     | 26 GB     | 13 GB - 15 GB  | 6.5 GB - 8 GB      |
+| 32B     | 130 GB    | 65 GB     | 32.5 GB - 35 GB| 16.25 GB - 19 GB   |
+| 65B     | 260.8 GB  | 130.4 GB  | 65.2 GB - 67 GB| 32.6 GB - 35 GB    |
+
+
+## Pending Work
+- Implementing RAG for the streamlit application
+- Getting the response in structured JSON format
+- Providing the option for the user to switch the response between JSON format and regular text.
