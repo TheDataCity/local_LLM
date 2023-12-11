@@ -42,7 +42,7 @@ The database folder will contain text files extracted from various companies' we
 project-root/<br/>
 │<br/>
 ├── data/<br/>
-│ └── text_file_database<br/>
+│ └── text_file_database/<br/>
 │ │   └── company_1_info.txt<br/>
 │ │   └── company_2_info.txt<br/>
 │ │   └── ...<br/>
@@ -51,7 +51,7 @@ project-root/<br/>
 ```shell
 python createVectorDb.py
 ```
-**Note**
+**Note:**
 Use the device type argument to specify a given device.
 To run on `cpu`
 ```shell
@@ -68,6 +68,27 @@ Use help for a full list of supported devices.
 python createVectorDb.py --help
 ```
 
+Here's a brief explanation for each device type:
+- **CPU**: Standard processing unit used in most computers.
+- **CUDA**: NVIDIA's parallel computing platform for general computing on GPUs (Graphics Processing Units).
+- **IPU**: Intelligence Processing Unit, designed for machine learning and AI tasks.
+- **XPU**: A general term for any type of processing unit including CPUs, GPUs, and specialized accelerators.
+- **MKLDNN**: Math Kernel Library for Deep Neural Networks, optimized for high performance on Intel CPUs.
+- **OpenGL**: A cross-language, cross-platform API for rendering 2D and 3D vector graphics.
+- **OpenCL**: Open Computing Language, used for programming tasks across different platforms like CPUs and GPUs.
+- **IDeep**: Intel Deep Learning Inference Engine, for optimized deep learning inference on Intel hardware.
+- **HIP**: Heterogeneous-compute Interface for Portability, a runtime API for porting CUDA applications to AMD GPUs.
+- **VE**: Vector Engine, typically used in high-performance computing.
+- **FPGA**: Field-Programmable Gate Array, an integrated circuit designed to be configured after manufacturing.
+- **ORT**: ONNX Runtime, a cross-platform, high-performance scoring engine for Open Neural Network Exchange models.
+- **XLA**: Accelerated Linear Algebra, a domain-specific compiler for linear algebra that optimizes TensorFlow computations.
+- **Lazy**: Refers to lazy evaluation in computing, where computation is delayed until necessary.
+- **Vulkan**: A low-overhead, cross-platform API for high-performance 3D graphics and compute tasks.
+- **MPS**: Metal Performance Shaders, used for efficient graphic and compute tasks on Apple GPUs.
+- **Meta**: A device type in PyTorch that allows for tensor computation without actually performing it, useful for debugging and testing.
+- **HPU**: Habana Processing Unit, specialized for AI and machine learning tasks.
+- **MTIA**: Multi-threaded Interconnect Architecture, designed for high-efficiency data communication between devices.
+
 Once the code is executed sucessfully you will find the "vector_database" folder created within the "data" folder.
 
 ## Executing the code for Command line interface.
@@ -75,7 +96,24 @@ In order to chat using command line, run the following command (by default, it w
 ```shell
 python run_localLLM.py
 ```
-You can also specify the device type just like `ingest.py`
+You can also specify the device type just like `createVectorDb.py`
 ```shell
-python run_localGPT.py --device_type mps # to run on Apple silicon
+python run_localLLM.py --device_type mps # to run on Apple silicon
+```
+
+### Extra Options with run_localLLM.py
+
+You can use the `--show_sources` flag with `run_localLLM.py` to show which chunks were retrieved by the embedding model.
+```shell
+python run_localLLM.py --show_sources
+```
+
+Another option is to enable chat history.
+```shell
+python run_localLLM.py --use_history
+```
+
+Another option is to save the chat in a csv file.
+```shell
+python run_localLLM.py --save_qa
 ```
