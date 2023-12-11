@@ -97,7 +97,8 @@ def load_model(device_type, model_id, model_basename=None, LOGGING=logging):
     return local_llm
 
 
-def retrieval_qa_pipline(device_type, use_history, promptTemplate_type="llama"):
+def retrieval_qa_pipline(device_type, use_history,company_Number, promptTemplate_type="llama"):
+    
     """
     Initializes and returns a retrieval-based Question Answering (QA) pipeline.
 
@@ -126,7 +127,7 @@ def retrieval_qa_pipline(device_type, use_history, promptTemplate_type="llama"):
 
     # load the vectorstore
     db = Chroma(
-        persist_directory = os.path.join(PERSIST_DIRECTORY, "00856444"),
+        persist_directory = os.path.join(PERSIST_DIRECTORY, company_Number),
         embedding_function=embeddings,
         client_settings=CHROMA_SETTINGS
     )
@@ -161,6 +162,14 @@ def retrieval_qa_pipline(device_type, use_history, promptTemplate_type="llama"):
 
     return qa
 
+def chatWithLLM(show_sources, save_qa, qa, query):
+    # Get the answer from the chain
+    
+    res = qa(query)
+    
+    answer, docs = res["result"], res["source_documents"]
+        
+    return answer, docs
 
 # chose device typ to run on as well as to show source documents.
 @click.command()
@@ -218,7 +227,40 @@ def retrieval_qa_pipline(device_type, use_history, promptTemplate_type="llama"):
     help="whether to save Q&A pairs to a CSV file (Default is False)",
 )
 
-def main(device_type, show_sources, use_history, model_type, save_qa):
+@click.option(
+    "--company_number",
+    prompt="Enter the company Number you want to know about from the data/vector_database folder",
+    help="The company number to query in the vector database."
+)
+
+def main(device_type, show_sources, use_history, model_type, save_qa, company_number = None):
+    qa = run_main_process(device_type, show_sources, use_history, model_type, save_qa, company_number)
+    while True:
+        query = input("\nEnter a query: ")
+        if query == "exit":
+            break
+
+        response, sources = chatWithLLM(show_sources, save_qa, qa, query)
+
+        # Print the result
+        print("\n\n> Question:")
+        print(query)
+        print("\n> Answer:")
+        print(response)
+
+        if show_sources:  # this is a flag that you can set to disable showing answers.
+            # # Print the relevant sources used for the answer
+            print("----------------------------------SOURCE DOCUMENTS---------------------------")
+            for document in sources:
+                print("\n> " + document.metadata["source"] + ":")
+                print(document.page_content)
+            print("----------------------------------SOURCE DOCUMENTS---------------------------")
+        
+        # Log the Q&A to CSV only if save_qa is True
+        if save_qa:
+            utils.log_to_csv(query, response)
+
+def run_main_process(device_type, show_sources, use_history, model_type, save_qa, company_number):
     """
     Implements the main information retrieval task for a localGPT.
 
@@ -247,34 +289,9 @@ def main(device_type, show_sources, use_history, model_type, save_qa):
     if not os.path.exists(MODELS_PATH):
         os.mkdir(MODELS_PATH)
 
-    qa = retrieval_qa_pipline(device_type, use_history, promptTemplate_type=model_type)
-    # Interactive questions and answers
-    while True:
-        query = input("\nEnter a query: ")
-        if query == "exit":
-            break
-        # Get the answer from the chain
-        res = qa(query)
-        answer, docs = res["result"], res["source_documents"]
+    qa = retrieval_qa_pipline(device_type, use_history, company_number, promptTemplate_type=model_type)
 
-        # Print the result
-        print("\n\n> Question:")
-        print(query)
-        print("\n> Answer:")
-        print(answer)
-
-        if show_sources:  # this is a flag that you can set to disable showing answers.
-            # # Print the relevant sources used for the answer
-            print("----------------------------------SOURCE DOCUMENTS---------------------------")
-            for document in docs:
-                print("\n> " + document.metadata["source"] + ":")
-                print(document.page_content)
-            print("----------------------------------SOURCE DOCUMENTS---------------------------")
-        
-        # Log the Q&A to CSV only if save_qa is True
-        if save_qa:
-            utils.log_to_csv(query, answer)
-
+    return qa
 
 if __name__ == "__main__":
     main()

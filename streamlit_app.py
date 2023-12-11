@@ -1,8 +1,9 @@
 import os
+import click
+import torch
 import streamlit as st
 import pandas as pd
 import regex as re
-from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.memory.chat_message_histories import StreamlitChatMessageHistory
@@ -11,11 +12,14 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.embeddings import SentenceTransformerEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.prompts import PromptTemplate
-import json
-from output_praser import parse_response
+from run_localLLM import run_main_process
+from run_localLLM import chatWithLLM
 
-load_dotenv()
-embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+device_type = "cpu"
+show_sources = False 
+use_history = False 
+model_type = "llama" 
+save_qa = False 
 
 st.set_page_config(page_title="Companies Information Bot", page_icon="🌐")
 st.title("💬 Companies Info Chat Bot")
@@ -25,11 +29,6 @@ msgs = StreamlitChatMessageHistory()
 memory = ConversationBufferMemory(memory_key="chat_history", chat_memory=msgs, return_messages=True)
 
 @st.cache_resource(ttl="1h")
-
-def get_retriever(companyNumber):
-    db = Chroma(persist_directory=f"data/Vector_Database/{companyNumber}", embedding_function=embeddings)
-    retriever = db.as_retriever(search_kwargs={"k": 4, "fetch_k": 10})
-    return retriever
 
 class StreamHandler(BaseCallbackHandler):
     def __init__(self, container: st.delta_generator.DeltaGenerator, initial_text: str = ""):
@@ -65,6 +64,7 @@ class PrintRetrievalHandler(BaseCallbackHandler):
             self.status.markdown(doc.page_content)
         self.status.update(state="complete")
 
+
 def clear_content():
     msgs.clear()
     initialMessage = 'Ask me anything about "' + st.session_state['issue'] + '" !'
@@ -75,27 +75,41 @@ with st.sidebar:
     option = st.selectbox(
       'Select a company about which you want to know',
       (pd.read_csv(f'data/Company_Names_with_Company_Numbers(Options).csv')),index=None, placeholder="Select a company",on_change=clear_content, key = 'issue')
-    if option is not None:
-        match = re.search(r'\(([^)]+)\)', option)
-        extractedOption = match.group(1)
-        temp = extractedOption
-        extracted_name = re.match(r"^[^(]+", option)
-        if extracted_name:
-            companyName = extracted_name.group().strip()
-    
+
     # st.write('You selected:', option)
-    "[View the source code](https://github.com/TheDataCity/llm-exploration)"
+    "[View the source code](https://github.com/TheDataCity/local_LLM)"
+    # if tempOption != option:
+    #     checkFlag = True
+    #     tempOption = option
+
+    show_sources = st.checkbox('Show the Sources')
+    use_history = st.checkbox('Use the History')
+    save_qa = st.checkbox('Save the Chat') 
+
+    device_type = st.selectbox(
+      'Select a device type',
+      ("cpu","cuda","ipu","xpu","mkldnn","opengl","opencl","ideep","hip","ve","fpga","ort","xla","lazy","vulkan","mps","meta","hpu","mtia")
+      ,index=None, placeholder="Select a device")
+    
+    model_type = st.selectbox(
+      'Select a model type',
+      ("llama", "mistral", "non_llama")
+      ,index=None, placeholder="Select a LLM model")
+
+    if option is not None:
+        last_parenthesis_pos = option.rfind('(')
+        # Extracting the text inside the last set of parentheses
+        if last_parenthesis_pos != -1:
+            companyNumber = st.session_state['issue'][last_parenthesis_pos + 1:-1]  # Slicing from '(' to the end, excluding ')'
+        else:
+            companyNumber = ""
+    
+        qa = run_main_process(device_type,show_sources,use_history,model_type,save_qa, company_number=companyNumber)
+        chackFlag = False
 
 if not option:
         st.info("Please select a company from the drop down menu")
         st.stop()
-
-retriever = get_retriever(extractedOption)
-
-# Setup LLM and QA chain
-llm = ChatOpenAI(model_name="gpt-4",temperature=0, streaming=True)
-qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, memory=memory, verbose=True,)
-
 
 avatars = {"human": "❓", "ai": "❄️"}
 for msg in msgs.messages:
@@ -105,10 +119,9 @@ if user_query := st.chat_input(placeholder="Ask me anything about the company!")
     st.chat_message("user", avatar= "❓").write(user_query)
 
     with st.chat_message("assistant", avatar="❄️"):
-        retrieval_handler = PrintRetrievalHandler(st.container())
-        stream_handler = StreamHandler(st.empty())
         print("user_query :- ", user_query)
-        response = qa_chain.run(user_query, callbacks=[retrieval_handler, stream_handler])
-        print("response : - ", response)
-        jsonResponse = parse_response(response)
-        st.json(jsonResponse)
+        response, sources = chatWithLLM(show_sources, save_qa, qa, user_query)
+        st.write(response)
+        print(sources)
+        # response = qa_chain.run(user_query, callbacks=[retrieval_handler, stream_handler])
+        # st.json(jsonResponse)
