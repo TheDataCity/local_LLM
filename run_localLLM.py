@@ -246,7 +246,7 @@ def main(device_type, show_sources, use_history, model_type, save_qa, company_nu
         print("\n\n> Question:")
         print(query)
         print("\n> Answer:")
-        print(response)
+        print(response.strip())
 
         if show_sources:  # this is a flag that you can set to disable showing answers.
             # # Print the relevant sources used for the answer

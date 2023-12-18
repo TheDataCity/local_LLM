@@ -36,7 +36,7 @@ pip install llama-cpp-python
 ```
 
 # Creating the Vector Database
-The database folder will contain text files extracted from various companies' websites. These text files will be used by the chatbot to provide information about specific company.
+The database folder will contain text files extracted from various companies' websites. These text files will be used by the chatbot to provide information about specific company. Sample text files are provided in the root directory.
 
 **Location**: The database folder is expected to be located in the root directory of this project. Sample of two companies is provided in the repository and move it accordingly to the database folder. The project folder structure should look like this:<br/>
 project-root/<br/>
