@@ -1,0 +1,8 @@
+https://huggingface.co/TheBloke
+
+
+LocalGPT uses LlamaCpp-Python for GGML (you will need llama-cpp-python <=0.1.76) and GGUF (llama-cpp-python >=0.1.83) models.
+
+
+GPTQ - NVDIA GPU
+GGML - CPU
