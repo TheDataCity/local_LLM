@@ -38,6 +38,11 @@ llama-cpp-python
 #pip uninstall torch
 #pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
+
+# setx CMAKE_ARGS -DLLAMA_CUBLAS=on
+# setx FORCE_CMAKE 1
+
+
 # $env:CMAKE_ARGS="-DLLAMA_CUBLAS=on"     
 # $env:FORCE_CMAKE=1                                                                                                                
 #pip install llama-cpp-python --force-reinstall --no-cache-dir --verbose                                                        

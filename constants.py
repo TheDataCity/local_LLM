@@ -102,8 +102,8 @@ EMBEDDING_MODEL_NAME = "hkunlp/instructor-large"  # Uses 1.5 GB of VRAM (High Ac
 # MODEL_ID = "TheBloke/Mistral-7B-Instruct-v0.2-code-ft-GGUF"
 # MODEL_BASENAME = "mistral-7b-instruct-v0.2-code-ft.Q5_K_M.gguf"
 
-# MODEL_ID = "TheBloke/Llama-2-70b-Chat-GGUF"
-# MODEL_BASENAME = "llama-2-70b-chat.Q4_K_M.gguf"
+MODEL_ID = "TheBloke/Llama-2-70b-Chat-GGUF"
+MODEL_BASENAME = "llama-2-70b-chat.Q4_K_M.gguf"
 
 ####
 #### (FOR HF MODELS)
@@ -185,5 +185,5 @@ EMBEDDING_MODEL_NAME = "hkunlp/instructor-large"  # Uses 1.5 GB of VRAM (High Ac
 # MODEL_ID = "TheBloke/Llama-2-7B-Chat-AWQ"
 # MODEL_BASENAME = "model.safetensors.awq"
 
-MODEL_ID = "TheBloke/Llama-2-7b-Chat-GPTQ"
-MODEL_BASENAME = "model.safetensors"
+# MODEL_ID = "TheBloke/Llama-2-7b-Chat-GPTQ"
+# MODEL_BASENAME = "model.safetensors"

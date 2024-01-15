@@ -6,3 +6,7 @@ LocalGPT uses LlamaCpp-Python for GGML (you will need llama-cpp-python <=0.1.76)
 
 GPTQ - NVDIA GPU
 GGML - CPU
+
+GGUF (Formerly GGML) is only for CPU. If you are using CUDA you need the GPTQ models
+
+As mentioned above, GGUF is a great option if you are running localGPT on Apple silicon or CPU. If you have access to an NVIDIA GPU
